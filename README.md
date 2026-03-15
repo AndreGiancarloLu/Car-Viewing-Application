@@ -113,7 +113,6 @@ The image below shows the default News page:
 ![News Page](docs/screenshots/Default_News.png)
 
 The image below shows the page after you click the "View Details" button on a specific news article:
-<!-- Screenshot: news page -->
 ![Detailed News Page](docs/screenshots/Detailed_News_Page.png)
 
 ### Database
@@ -130,7 +129,7 @@ The image below shows the Database page after clicking the "Add Car" button:
 
 ### Settings
 
-The settings page allows you to change the display currency. Supported currencies are PHP (Philippine Peso), USD (US Dollar), and CNY (Chinese Yuan). Prices across the entire app update immediately when the currency is changed. Note that conversion rates are approximate and fixed -- they are not fetched live.
+The settings page allows you to change the display currency. Supported currencies are PHP (Philippine Peso), USD (US Dollar), and CNY (Chinese Yuan). Prices across the entire app update immediately when the currency is changed. Note that conversion rates are approximate and fixed. They are not fetched live.
 
 The image below shows the Settings page with the dropdown for selecting currency:
 ![Settings Page](docs/screenshots/Settings.png)
