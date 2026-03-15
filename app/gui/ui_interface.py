@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QLineEdit, QComboBox, QSizePolicy, QSpacerItem, QTableWidget,
     QTableWidgetItem
 )
-
+import app.gui.resources
 from PySide6.QtSql import QSqlDatabase, QSqlTableModel
 from PySide6.QtWidgets import QTableView
 from app.gui.components.custom_widgets import SlideMenu, AnimatedStackedWidget, ButtonGroup
@@ -188,6 +188,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.frame, 0, Qt.AlignmentFlag.AlignRight)
 
         self.verticalLayout.addWidget(self.header)
+        self.pushButton_2.hide()  # user/profile
+        self.pushButton_3.hide()  # bell/notifications  
+        self.pushButton_4.hide()  # search
 
         self.mainBody = QWidget(self.centralwidget)
         self.mainBody.setObjectName(u"mainBody")
@@ -627,6 +630,7 @@ class Ui_MainWindow(object):
         self.nav_button_group.setup(nav_buttons, active_style, inactive_style)
         
         self.nav_button_group.set_active(self.homeBtn)
+        self.leftMenu.expand()
         
     
     def setup_database_table_view(self):

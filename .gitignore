@@ -1,0 +1,22 @@
+# Virtual environment
+testenv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated data — recreated on launch
+data/raw/listings.json
+data/raw/news.json
+data/processed/
+data/images/
+
+# Logs
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db

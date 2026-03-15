@@ -1,0 +1,38 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+
+  <!-- Feather Icons -->
+  <qresource prefix="/feather">
+    <file>icons/feather/align-justify.png</file>
+    <file>icons/feather/bell.png</file>
+    <file>icons/feather/chevron-left.png</file>
+    <file>icons/feather/database.png</file>
+    <file>icons/feather/edit-2.png</file>
+    <file>icons/feather/help-circle.png</file>
+    <file>icons/feather/home.png</file>
+    <file>icons/feather/info.png</file>
+    <file>icons/feather/plus-square.png</file>
+    <file>icons/feather/search.png</file>
+    <file>icons/feather/settings.png</file>
+    <file>icons/feather/user.png</file>
+    <file>icons/feather/window_close.png</file>
+  </qresource>
+
+  <!-- Font Awesome Solid Icons -->
+  <qresource prefix="/font_awesome_solid">
+    <file>icons/font_awesome/solid/car.png</file>
+    <file>icons/font_awesome/solid/scale-unbalanced.png</file>
+  </qresource>
+
+  <!-- Font Awesome Regular Icons -->
+  <qresource prefix="/font_awesome_regular">
+    <file>icons/font_awesome/regular/newspaper.png</file>
+  </qresource>
+
+  <!-- Material Design Icons -->
+  <qresource prefix="/material_design">
+    <file>icons/material_design/add.png</file>
+    <file>icons/material_design/add_circle.png</file>
+  </qresource>
+
+</RCC>

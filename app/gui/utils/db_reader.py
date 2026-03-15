@@ -1,10 +1,11 @@
 import sqlite3
 from pathlib import Path
+from datetime import datetime
 
 def fetch_car_data():
     db_path = Path(__file__).resolve().parents[3] / "data" / "processed" / "cars.db"
 
-    print(f"[DEBUG] DB path: {db_path}")  # Debug print
+    print(f"[DEBUG] DB path: {db_path}")
 
     if not db_path.exists():
         raise FileNotFoundError(f"[ERROR] Database file not found: {db_path}")
@@ -35,10 +36,19 @@ def fetch_car_data():
         })
     return car_data
 
+def parse_news_date(date_str):
+    """Parse date strings like 'Apr 25, 2025' into a datetime for sorting."""
+    if not date_str:
+        return datetime.min
+    try:
+        return datetime.strptime(date_str.strip(), "%b %d, %Y")
+    except ValueError:
+        return datetime.min
+
 def fetch_news_data():
     db_path = Path(__file__).resolve().parents[3] / "data" / "processed" / "news.db"
 
-    print(f"[DEBUG] DB path: {db_path}")  # Debug print
+    print(f"[DEBUG] DB path: {db_path}")
 
     if not db_path.exists():
         raise FileNotFoundError(f"[ERROR] Database file not found: {db_path}")
@@ -46,7 +56,8 @@ def fetch_news_data():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT title, link, image_url, local_image_path, author, date, intro FROM news ORDER BY date DESC")
+    # Fetch
+    cursor.execute("SELECT title, link, image_url, local_image_path, author, date, intro FROM news")
     rows = cursor.fetchall()
     conn.close()
 
@@ -61,4 +72,8 @@ def fetch_news_data():
             "date": row[5],
             "intro": row[6],
         })
+
+    # Sort by parsed date, most recent first
+    news_data.sort(key=lambda x: parse_news_date(x["date"]), reverse=True)
+
     return news_data

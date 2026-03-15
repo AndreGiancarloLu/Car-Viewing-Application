@@ -1,4 +1,3 @@
-
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QGridLayout, QLabel, QStackedWidget
 from PySide6.QtCore import Signal, Qt
 from app.gui.components.comparison_car_box import ComparisonCarBox
@@ -65,7 +64,7 @@ class ComparisonCarSelector(QWidget):
         # If no cars match, show a message
         if not data:
             no_cars_label = QLabel("No cars match your search criteria")
-            no_cars_label.setStyleSheet("color: white; font-size: 14px;")
+            no_cars_label.setStyleSheet("color: white; font-size: 18px;")
             no_cars_label.setAlignment(Qt.AlignCenter)
             self.grid_layout.addWidget(no_cars_label, 0, 0)
             return
@@ -91,7 +90,7 @@ class ComparisonCarSelector(QWidget):
         # Create header
         header = QLabel(f"{self.side.capitalize()} Car Selected")
         header.setStyleSheet("""
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
             color: white;
             margin-bottom: 10px;
@@ -149,4 +148,3 @@ class ComparisonCarSelector(QWidget):
             ]
         
         self.display_cars(filtered)
-

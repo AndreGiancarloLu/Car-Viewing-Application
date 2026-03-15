@@ -6,6 +6,14 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from pathlib import Path
 
+session = requests.Session()
+session.headers.update({
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Referer": "https://www.google.com/"
+})
+
 def download_image(url, save_dir="data/images"):
     try:
         os.makedirs(save_dir, exist_ok=True)
@@ -13,7 +21,7 @@ def download_image(url, save_dir="data/images"):
         filepath = os.path.join(save_dir, filename)
 
         if not os.path.exists(filepath):
-            response = requests.get(url, timeout=10)
+            response = session.get(url, timeout=10)
             response.raise_for_status()
             with open(filepath, 'wb') as f:
                 f.write(response.content)
@@ -123,7 +131,7 @@ def extract_model(title, brand):
 
 def fetch_new_car_details(url):
     try:
-        response = requests.get(url, timeout=10)
+        response = session.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
