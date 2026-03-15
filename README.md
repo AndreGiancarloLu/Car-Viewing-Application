@@ -120,8 +120,13 @@ The image below shows the page after you click the "View Details" button on a sp
 
 The database page shows a raw table view of all car records currently stored in the local SQLite database. Columns can be sorted by clicking the headers.
 
+New car listings can be added directly from this page by clicking the **Add Car** button in the top-right corner, which opens a side panel. Paste an AutoDeal listing URL into the input field and click **Add Car** to scrape and save the listing to the database. The table and cars page update automatically once the listing is added.
+
 The image below shows the Database page:
 ![Database Page](docs/screenshots/Database.png)
+
+The image below shows the Database page after clicking the "Add Car" button:
+![Add Car Database Page](docs/screenshots/Add_Car_Database.png)
 
 ### Settings
 

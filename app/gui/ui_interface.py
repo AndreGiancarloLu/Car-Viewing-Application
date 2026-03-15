@@ -666,7 +666,6 @@ class Ui_MainWindow(object):
         model.setTable("cars")
         model.select()
 
-        
         table_view = QTableView()
         table_view.setModel(model)
 
@@ -697,23 +696,17 @@ class Ui_MainWindow(object):
             }
         """)
 
-
         table_view.setSortingEnabled(True)
         table_view.resizeColumnsToContents()
         table_view.setSelectionBehavior(QTableView.SelectRows)
         table_view.setEditTriggers(QTableView.NoEditTriggers)
 
-        # Clear any existing table view before adding new one
-        while self.verticalLayout_10.count():
-            item = self.verticalLayout_10.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-
-        # Clear any existing table view before adding new one
-        while self.verticalLayout_10.count():
-            item = self.verticalLayout_10.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+        for i in reversed(range(self.verticalLayout_10.count())):
+            item = self.verticalLayout_10.itemAt(i)
+            widget = item.widget() if item else None
+            if widget and widget is not self.widget_3:
+                self.verticalLayout_10.removeWidget(widget)
+                widget.deleteLater()
 
         self.verticalLayout_10.addWidget(table_view)
 

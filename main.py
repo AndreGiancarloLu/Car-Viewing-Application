@@ -90,18 +90,16 @@ class MainWindow(QMainWindow):
         QThreadPool.globalInstance().start(worker)
 
     def on_car_added(self, car):
-        # Close Qt's database connection before writing
         if QSqlDatabase.contains("cars_connection"):
             QSqlDatabase.database("cars_connection").close()
 
-        # Write to database
         load_cars([car])
-
-        # Reopen Qt connection for the database page
         self.ui.setup_database_table_view()
 
-        # Refresh cars page
-        self.car_data = fetch_car_data()
+        fresh_data = fetch_car_data()
+        self.car_data.clear()
+        self.car_data.extend(fresh_data)
+
         self.ui.cars_page.display_cars(self.car_data)
 
         self.ui.addCarStatus.setStyleSheet("font-size: 11px; color: #34d399; padding: 2px 4px;")
@@ -115,6 +113,8 @@ class MainWindow(QMainWindow):
         self.ui.addUserBtn.setEnabled(True)
 
     def goto_page(self, index):
+        self.ui.rightMenu.collapse()
+
         self.ui.mainPages.slide_to_index(index)
         buttons = [
             self.ui.homeBtn, self.ui.carsBtn, self.ui.compareBtn,
