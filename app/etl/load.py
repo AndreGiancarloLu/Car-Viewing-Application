@@ -4,8 +4,8 @@ from pathlib import Path
 def create_car_connection():
     db_path = Path(__file__).resolve().parents[2] / "data" / "processed" / "cars.db"
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    return sqlite3.connect(db_path)
-
+    conn = sqlite3.connect(db_path, timeout=10)  # wait up to 10 seconds for lock
+    return conn
 def create_car_table(conn):
     cursor = conn.cursor()
     cursor.execute('''
@@ -62,7 +62,8 @@ def load_cars(transformed_data):
 def create_news_connection():
     db_path = Path(__file__).resolve().parents[2] / "data" / "processed" / "news.db"
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    return sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=10)
+    return conn
 
 def create_news_table(conn):
     cursor = conn.cursor()

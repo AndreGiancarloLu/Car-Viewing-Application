@@ -1,194 +1,161 @@
 from PySide6.QtWidgets import (
-    QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QPushButton, QFrame, QSizePolicy
+    QWidget, QLabel, QVBoxLayout, QHBoxLayout,
+    QPushButton, QFrame, QSizePolicy, QScrollArea
 )
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 import os
 import webbrowser
-from app.settings.app_settings import app_settings
-import requests
-from bs4 import BeautifulSoup
+
 
 class NewsDetailsPage(QWidget):
     def __init__(self, news_data):
         super().__init__()
 
-        self.setStyleSheet("""
-            QLabel {
-                color: white;
-                font-size: 16px;
-            }
-            QFrame#ImageSection {
-                background-color: #1E293B;
-                border-radius: 10px;
-            }
-            QFrame#DetailsSection {
-                background-color: #0F172A;
-                border-radius: 10px;
-                padding: 20px;
-            }
-            QLabel#snippet {
-                padding-right: 10px;
-            }
-        """)
+        self.setStyleSheet("background: transparent;")
 
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(40, 30, 40, 30)
-        main_layout.setSpacing(20)
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
 
-        # Title
-        # Title Frame
-        title_frame = QFrame()
-        title_frame.setStyleSheet("""
-            QFrame {
-                background-color: #334155;
-                border-radius: 10px;
-                padding: 16px;
-            }
-            QLabel {
-                font-size: 28px;
-                font-weight: bold;
-                color: white;
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+
+        container = QWidget()
+        container.setStyleSheet("background: transparent;")
+        main_layout = QVBoxLayout(container)
+        main_layout.setContentsMargins(0, 0, 0, 40)
+        main_layout.setSpacing(0)
+
+        # ── Full width title banner ──
+        title_banner = QWidget()
+        title_banner.setObjectName("TitleBanner")
+        title_banner.setAttribute(Qt.WA_StyledBackground, True)
+        title_banner.setStyleSheet("""
+            #TitleBanner {
+                background-color: #1e293b;
+                border-bottom: 2px solid #334155;
             }
         """)
-        title_layout = QVBoxLayout(title_frame)
-        title_layout.setContentsMargins(0, 0, 0, 0)
-        title_layout.setAlignment(Qt.AlignCenter)
+        title_banner_layout = QVBoxLayout(title_banner)
+        title_banner_layout.setContentsMargins(60, 24, 60, 24)
 
-        title = QLabel(news_data["title"])
-        title.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        title_layout.addWidget(title)
+        title_label = QLabel(news_data.get("title", "Untitled"))
+        title_label.setWordWrap(True)
+        title_label.setAlignment(Qt.AlignCenter)
+        title_label.setStyleSheet("font-size: 28px; font-weight: bold; color: #f1f5f9;")
+        title_banner_layout.addWidget(title_label)
 
-        main_layout.addWidget(title_frame)
+        main_layout.addWidget(title_banner)
 
-        
+        # ── Full width hero image ──
+        image_path = news_data.get("local_image_path", "")
+        if image_path and os.path.exists(image_path):
+            self.image_label = QLabel()
+            self.image_label.setAlignment(Qt.AlignCenter)
+            self.image_label.setMinimumHeight(200)
+            self.image_label.setStyleSheet("background-color: #0f172a;")
+            self._image_path = image_path
+            # Load pixmap to scale to full width on show
+            pixmap = QPixmap(image_path)
+            if not pixmap.isNull():
+                scaled = pixmap.scaled(700, 200, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
+                self.image_label.setPixmap(scaled)
+            main_layout.addWidget(self.image_label)
 
-        # Main horizontal split: image + details
-        content_layout = QHBoxLayout()
-        content_layout.setSpacing(30)
+        # ── Content area ──
+        content_widget = QWidget()
+        content_widget.setStyleSheet("background: transparent;")
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(60, 32, 60, 32)
+        content_layout.setSpacing(28)
 
-        # Image Section
-        image_frame = QFrame()
-        image_frame.setObjectName("ImageSection")
-        image_frame.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        image_layout = QVBoxLayout(image_frame)
-        image_layout.setAlignment(Qt.AlignCenter)
-        image_layout.setContentsMargins(20, 20, 20, 20)
-    
+        # Meta row
+        meta_frame = QFrame()
+        meta_frame.setObjectName("MetaFrame")
+        meta_frame.setAttribute(Qt.WA_StyledBackground, True)
+        meta_frame.setStyleSheet("""
+            #MetaFrame {
+                background-color: #1e293b;
+                border-radius: 10px;
+                border-left: 4px solid #2b6cb0;
+            }
+        """)
+        meta_layout = QHBoxLayout(meta_frame)
+        meta_layout.setContentsMargins(24, 20, 24, 20)
+        meta_layout.setSpacing(60)
 
-        if news_data.get("local_image_path") and os.path.exists(news_data["local_image_path"]):
-            pixmap = QPixmap(news_data["local_image_path"]).scaled(600, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            image_label = QLabel()
-            image_label.setPixmap(pixmap)
-            image_label.setAlignment(Qt.AlignCenter)
-            image_layout.addWidget(image_label)
-        else:
-            image_layout.addWidget(QLabel("No image available"))
+        for heading, value in [
+            ("Author", news_data.get("author", "Unknown")),
+            ("Date", news_data.get("date", "Unknown")),
+        ]:
+            col = QVBoxLayout()
+            col.setSpacing(4)
+            h = QLabel(heading.upper())
+            h.setStyleSheet("font-size: 12px; color: #64748b; font-weight: bold; letter-spacing: 1px;")
+            v = QLabel(value)
+            v.setStyleSheet("font-size: 18px; color: #e2e8f0; font-weight: bold;")
+            col.addWidget(h)
+            col.addWidget(v)
+            meta_layout.addLayout(col)
 
-        # Details Section 
-        details_frame = QFrame()
-        details_frame.setObjectName("DetailsSection")
-        details_frame.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        self.details_layout = QVBoxLayout(details_frame)
-        self.details_layout.setSpacing(12)
+        meta_layout.addStretch()
+        content_layout.addWidget(meta_frame)
 
+        # Snippet
+        snippet_frame = QFrame()
+        snippet_frame.setObjectName("SnippetFrame")
+        snippet_frame.setAttribute(Qt.WA_StyledBackground, True)
+        snippet_frame.setStyleSheet("""
+            #SnippetFrame {
+                background-color: #0f172a;
+                border-radius: 10px;
+                border: 1px solid #334155;
+            }
+        """)
+        snippet_layout = QVBoxLayout(snippet_frame)
+        snippet_layout.setContentsMargins(30, 24, 30, 24)
+        snippet_layout.setSpacing(12)
 
-        self.price_label = QLabel()  
+        snippet_heading = QLabel("ARTICLE SNIPPET")
+        snippet_heading.setStyleSheet("font-size: 12px; color: #64748b; font-weight: bold; letter-spacing: 1px;")
+        snippet_layout.addWidget(snippet_heading)
 
+        divider = QFrame()
+        divider.setFrameShape(QFrame.HLine)
+        divider.setStyleSheet("background-color: #334155; min-height: 1px; max-height: 1px;")
+        snippet_layout.addWidget(divider)
 
-        self.add_field("Author", news_data["author"])
-        self.add_field("Date", news_data["date"])
-        snippet = self.get_snippet(news_data["link"])
-        self.add_snippet_field("Snippet of Article", snippet)
+        snippet_text = news_data.get("intro") or "No snippet available."
+        snippet_value = QLabel(snippet_text)
+        snippet_value.setWordWrap(True)
+        snippet_value.setStyleSheet("font-size: 18px; color: #cbd5e1; line-height: 1.8;")
+        snippet_value.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        snippet_layout.addWidget(snippet_value)
 
-        # View Full Article Button
-        view_button = QPushButton("View Full Article")
+        content_layout.addWidget(snippet_frame)
+
+        # Button
+        view_button = QPushButton("View Full Article on AutoDeal.com.ph")
         view_button.setCursor(Qt.PointingHandCursor)
+        view_button.setFixedHeight(46)
         view_button.setStyleSheet("""
             QPushButton {
                 background-color: #059669;
                 color: white;
-                border-radius: 6px;
-                padding: 8px 14px;
-                font-size: 15px;
+                border-radius: 8px;
+                padding: 10px 20px;
+                font-size: 16px;
+                font-weight: bold;
             }
-            QPushButton:hover {
-                background-color: #10b981;
-            }
+            QPushButton:hover { background-color: #10b981; }
         """)
-        view_button.clicked.connect(lambda: self.open_full_article(news_data["link"]))
-        self.details_layout.addWidget(view_button, alignment=Qt.AlignLeft)
+        view_button.clicked.connect(lambda: webbrowser.open(news_data["link"]))
+        content_layout.addWidget(view_button, alignment=Qt.AlignLeft)
 
-        # Add both panels to layout
-        content_layout.addWidget(image_frame, 2)
-        content_layout.addWidget(details_frame, 3)
+        content_layout.addStretch()
+        main_layout.addWidget(content_widget)
 
-        main_layout.addLayout(content_layout)
-
-    def add_field(self, label_text, value_text, label_ref=None):
-            row = QHBoxLayout()
-            label = QLabel(f"{label_text}:")
-            value = QLabel(value_text)
-            label.setFixedWidth(110)
-            row.addWidget(label)
-            row.addWidget(value)
-            row.addStretch()
-            self.details_layout.addLayout(row)
-
-            if label_ref is not None:
-                label_ref.setText(value_text)  
-                label_ref.setObjectName(label_text.lower() + "_label")
-
-    def get_snippet(self, link):
-        response = requests.get(link)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Get all divs that match the class
-            paragraph_containers = soup.find_all('div', class_='padleft20 padright20 padbottom20')
-            
-            if paragraph_containers:
-                # Check if there is more than one container and select the second one
-                if len(paragraph_containers) > 1:
-                    paragraph_container = paragraph_containers[1]  # Select the second instance
-                else:
-                    paragraph_container = paragraph_containers[0]  # Fallback to the first one if there's only one
-
-                paragraphs = paragraph_container.find_all('p')
-                if paragraphs:
-                    # Get the first three paragraphs as a snippet
-                    snippet = ' '.join([para.get_text() for para in paragraphs[:3]])
-                    return snippet
-                else:
-                    return "No snippet available."
-            else:
-                return "No snippet available."
-        else:
-            return "Unable to fetch snippet."
-
-    def add_snippet_field(self, label_text, value_text):
-        # Create a row for the label and value
-        row = QHBoxLayout()
-        
-        # Label part
-        label = QLabel(f"{label_text}:")
-        label.setFixedWidth(130)
-        label.setAlignment(Qt.AlignTop)  # Align to top when text wraps
-        row.addWidget(label)
-        
-        # Value part with word wrap enabled
-        value = QLabel(value_text)
-        value.setObjectName("snippet")
-        value.setWordWrap(True)  # Enable word wrap
-        value.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        
-        # Add to row
-        row.addWidget(value, 1)  # Give the value label more space
-        
-        # Add the row to the details layout
-        self.details_layout.addLayout(row)
-
-    def open_full_article(self, url):
-
-        webbrowser.open(url)
+        scroll.setWidget(container)
+        outer_layout.addWidget(scroll)

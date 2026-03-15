@@ -188,9 +188,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.frame, 0, Qt.AlignmentFlag.AlignRight)
 
         self.verticalLayout.addWidget(self.header)
-        self.pushButton_2.hide()  # user/profile
-        self.pushButton_3.hide()  # bell/notifications  
-        self.pushButton_4.hide()  # search
 
         self.mainBody = QWidget(self.centralwidget)
         self.mainBody.setObjectName(u"mainBody")
@@ -471,29 +468,42 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_8.addWidget(self.label_2, 0, Qt.AlignmentFlag.AlignHCenter)
 
-        self.frame_5 = QFrame(self.widget_2)
-        self.frame_5.setObjectName(u"frame_5")
-        self.frame_5.setFrameShape(QFrame.Shape.StyledPanel)
-        self.frame_5.setFrameShadow(QFrame.Shadow.Raised)
-        self.verticalLayout_9 = QVBoxLayout(self.frame_5)
-        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
-        self.username = QLineEdit(self.frame_5)
-        self.username.setObjectName(u"username")
+        # Add Car heading
+        self.addCarHeading = QLabel("Add Car", self.widget_2)
+        self.addCarHeading.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.addCarHeading.setStyleSheet("font-size: 15px; font-weight: bold; color: #e2e8f0; padding: 4px 0;")
+        self.verticalLayout_8.addWidget(self.addCarHeading)
 
-        self.verticalLayout_9.addWidget(self.username)
+        # Instruction label
+        self.addCarInstruction = QLabel("Paste an AutoDeal listing URL below and click Add Car to scrape and save the listing.", self.widget_2)
+        self.addCarInstruction.setWordWrap(True)
+        self.addCarInstruction.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.addCarInstruction.setStyleSheet("font-size: 11px; color: #94a3b8; padding: 0 4px 8px 4px;")
+        self.verticalLayout_8.addWidget(self.addCarInstruction)
 
-        self.email = QLineEdit(self.frame_5)
-        self.email.setObjectName(u"email")
+        # URL input
+        self.carUrlInput = QLineEdit(self.widget_2)
+        self.carUrlInput.setObjectName(u"carUrlInput")
+        self.carUrlInput.setStyleSheet("""
+            QLineEdit {
+                background-color: #1e293b;
+                color: #e2e8f0;
+                border: 1px solid #334155;
+                border-radius: 6px;
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+        """)
+        self.verticalLayout_8.addWidget(self.carUrlInput)
 
-        self.verticalLayout_9.addWidget(self.email)
+        # Status label
+        self.addCarStatus = QLabel("", self.widget_2)
+        self.addCarStatus.setWordWrap(True)
+        self.addCarStatus.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.addCarStatus.setStyleSheet("font-size: 11px; color: #94a3b8; padding: 2px 4px;")
+        self.verticalLayout_8.addWidget(self.addCarStatus)
 
-        self.phoneNumber = QLineEdit(self.frame_5)
-        self.phoneNumber.setObjectName(u"phoneNumber")
-
-        self.verticalLayout_9.addWidget(self.phoneNumber)
-
-        self.verticalLayout_8.addWidget(self.frame_5)
-
+        # Add Car button
         self.addUserBtn = QPushButton(self.widget_2)
         self.addUserBtn.setObjectName(u"addUserBtn")
         self.addUserBtn.setFont(font)
@@ -514,6 +524,11 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
+
+        # Hide unused header buttons
+        self.pushButton_2.hide()
+        self.pushButton_3.hide()
+        self.pushButton_4.hide()
 
         QMetaObject.connectSlotsByName(MainWindow)
         
@@ -537,10 +552,8 @@ class Ui_MainWindow(object):
         self.showUserFormBtn.setText("Add Car")
         self.label_7.setText("HELP")
         self.label_3.setText("ABOUT")
-        self.username.setPlaceholderText("Username")
-        self.email.setPlaceholderText("Email")
-        self.phoneNumber.setPlaceholderText("Phone Number")
-        self.addUserBtn.setText("Add User")
+        self.addUserBtn.setText("Add Car")
+        self.carUrlInput.setPlaceholderText("https://www.autodeal.com.ph/...")
     
 
     def setup_custom_widgets(self):
@@ -630,15 +643,20 @@ class Ui_MainWindow(object):
         self.nav_button_group.setup(nav_buttons, active_style, inactive_style)
         
         self.nav_button_group.set_active(self.homeBtn)
+
+        # Open left menu by default on launch
         self.leftMenu.expand()
         
     
     def setup_database_table_view(self):
         db_path = Path(__file__).resolve().parents[2] / "data" / "processed" / "cars.db"
-        db = QSqlDatabase.addDatabase("QSQLITE")
-
-        if db.databaseName() != str(db_path):  
-            db.setDatabaseName(str(db_path))
+        
+        # Remove existing connection if it exists
+        if QSqlDatabase.contains("cars_connection"):
+            QSqlDatabase.removeDatabase("cars_connection")
+        
+        db = QSqlDatabase.addDatabase("QSQLITE", "cars_connection")
+        db.setDatabaseName(str(db_path))
 
         if not db.open():
             print("[ERROR] Could not open the database.")
@@ -684,6 +702,18 @@ class Ui_MainWindow(object):
         table_view.resizeColumnsToContents()
         table_view.setSelectionBehavior(QTableView.SelectRows)
         table_view.setEditTriggers(QTableView.NoEditTriggers)
+
+        # Clear any existing table view before adding new one
+        while self.verticalLayout_10.count():
+            item = self.verticalLayout_10.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        # Clear any existing table view before adding new one
+        while self.verticalLayout_10.count():
+            item = self.verticalLayout_10.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
         self.verticalLayout_10.addWidget(table_view)
 
